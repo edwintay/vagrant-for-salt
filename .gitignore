@@ -1,0 +1,7 @@
+# salt workspace linked from host with bin/link-dirs.py
+srv/salt
+srv/secret
+srv/formulas
+
+# reference samples
+etc/*.sample
