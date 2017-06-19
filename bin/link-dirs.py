@@ -5,6 +5,8 @@ import errno
 import os
 import sys
 
+import json
+
 def symlink(src, target, force=False):
   try:
     os.symlink(src, target)
@@ -15,14 +17,38 @@ def symlink(src, target, force=False):
     else:
       raise ex
 
+def find_sources(conf, salt, secret, formulas):
+  sources = {}
+  if conf:
+    with open(conf, "r") as ff:
+      sources = json.load(ff)
+
+  # Prefer command line over config file
+  # Normalize path relative to CWD for command line paths
+  if salt:
+    sources["salt"] = os.path.abspath(salt)
+  if secret:
+    sources["secret"] = os.path.abspath(secret)
+  if formulas:
+    sources["formulas"] = os.path.abspath(formulas)
+
+  # Check that necessary sources have all been defined
+  for name in ("salt", "secret", "formulas"):
+    if name not in sources:
+      raise argparse.ArgumentError("--%s" % name, "must be defined in "
+                                   "either command line or config file")
+
+  for name, path in sources.items():
+    expanded = os.path.expanduser(path)
+    expanded = os.path.expandvars(expanded)
+    sources[name] = expanded
+
+  return ( sources["salt"], sources["secret"], sources["formulas"] )
+
 def main(argv):
   cmd, args = parse_args(argv)
 
-  sources = (
-    os.path.abspath(args.salt),
-    os.path.abspath(args.secret),
-    os.path.abspath(args.formulas)
-  )
+  sources = find_sources(args.config, args.salt, args.secret, args.formulas)
 
   parent = os.path.dirname(os.path.dirname(os.path.abspath(cmd)))
   targets = (
@@ -31,24 +57,23 @@ def main(argv):
     os.path.join(parent, "srv/formulas")
   )
 
-  print "Linking:"
   for src, target in zip(sources, targets):
-    print "\t%s: %s" % (src, target)
+    rel_target = os.path.relpath(target)
+    print "Linking %s -> %s" % (rel_target, src)
     try:
       symlink(src, target, force=True)
     except OSError as ex:
-      print "Failed to create %s" % target
+      print "Failed to link %s -> %s" % (rel_target, src)
   return 0
 
 def parse_args(argv):
   parser = argparse.ArgumentParser(description="Symlink host directories "
                                    " into Vagrant guest /srv folder")
-  parser.add_argument("--salt", help="Dir that will be used as /srv/salt",
-                      required=True)
-  parser.add_argument("--secret", help="Dir that will be used as /srv/secret",
-                      required=True)
-  parser.add_argument("--formulas", help="Dir that will be mounted as "
-                      "/srv/formulas", required=True)
+  parser.add_argument("--salt", help="Dir that will be used as /srv/salt")
+  parser.add_argument("--secret", help="Dir that will be used as /srv/secret")
+  parser.add_argument("--formulas", help="Dir that will be mounted as ")
+  parser.add_argument("--config", help="Config file containing symlink "
+                      "mappings for /srv/")
   args = parser.parse_args(argv[1:])
   return argv[0], args
 
