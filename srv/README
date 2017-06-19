@@ -1,2 +1,0 @@
-Symlink working directories from the host into this directory, to expose them
-read-write to the guest VM
