@@ -2,12 +2,15 @@
 
 import argparse
 import errno
+import json
+import logging
 import os
 import sys
 
-import json
-
 DEFAULT_TOP = "srv"
+
+LOG_FORMAT="%(levelname)s :: %(message)s"
+logger = logging.getLogger(__name__)
 
 def symlink(src, target, force=False):
   try:
@@ -21,13 +24,13 @@ def symlink(src, target, force=False):
 
 def ensure_dir_exists(path, mode=0777):
   if os.path.islink(path):
-    print "Removing link %s" % path
+    logger.info("Removing link %s", path)
     os.remove(path)
 
   if os.path.isdir(path):
     return
 
-  print "Creating dir %s" % os.path.relpath(path)
+  logger.info("Creating dir %s", os.path.relpath(path))
   os.mkdir(path, mode)
 
 def expandvars(sources):
@@ -74,16 +77,18 @@ def link_sources(top, sources):
 
     # Otherwise, assume path and try symlinking
     linkrel = os.path.relpath(linkpath)
-    print "Linking %s -> %s" % (linkrel, src)
+    logger.info("Linking %s -> %s", linkrel, src)
     try:
       symlink(src, linkpath, force=True)
     except OSError as ex:
-      print "Failed to link %s -> %s" % (linkrel, src)
+      logger.error("Failed to link %s -> %s", linkrel, src)
 
   return
 
 def main(argv):
   cmd, args = parse_args(argv)
+
+  logging.basicConfig(level=args.loglevel, format=LOG_FORMAT)
 
   sources = find_sources(args.config)
 
@@ -96,8 +101,11 @@ def main(argv):
 def parse_args(argv):
   parser = argparse.ArgumentParser(description="Symlink host directories "
                                    " into Vagrant guest /srv folder")
-  parser.add_argument("--config", help="Config file containing symlink "
+  parser.add_argument("--config", help="config file containing symlink "
                       "mappings for /srv")
+  parser.add_argument("-s", "--silent", help="set log level to WARNING",
+                      dest="loglevel", action="store_const",
+                      const=logging.WARNING, default=logging.INFO)
   args = parser.parse_args(argv[1:])
   return argv[0], args
 
