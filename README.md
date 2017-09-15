@@ -35,8 +35,8 @@ Configuration files
 
 Encryption keys
 * keys/
-  * master\_minion.pem
-  * master\_minion.pub
+  * master.minion.pem
+  * master.minion.pub
 
 Roots
 * srv
