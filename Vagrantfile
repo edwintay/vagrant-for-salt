@@ -9,10 +9,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       :cpus => 2,
       :memory => 2048,
       :box => "ubuntu/xenial64"
+    },
+    :'centos-7-1' => {
+      :ip => "192.168.50.20",
+      :cpus => 1,
+      :memory => 1024,
+      :box => "centos/7"
     }
   }
 
   masters = machines.slice(:master)
+  minions = machines.except(:master)
 
   masters.each do |master_n, spec|
     config.vm.define master_n, primary: true do |master_c|
@@ -43,7 +50,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         salt.master_pub = "keys/#{master_n}.pub"
 
         # Preseed master with self and all other minions
-        salt.seed_master = { master_n => "keys/#{master_n}.minion.pub" }
+        seeds = { master_n => "keys/#{master_n}.minion.pub" }
+        minions.keys.each { |mn|
+          seeds[mn] = "keys/#{mn}.pub"
+        }
+        salt.seed_master = seeds
 
         salt.minion_config = "etc/#{master_n}.minion"
         salt.minion_key = "keys/#{master_n}.minion.pem"
@@ -59,4 +70,31 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
     end
   end
+
+  minions.each do |minion_n, spec|
+    config.vm.define minion_n do |minion_c|
+      minion_c.vm.provider "virtualbox" do |vb|
+        vb.name = "#{minion_n}"
+        vb.cpus = spec[:cpus]
+        vb.memory = spec[:memory]
+      end
+      minion_c.vm.box = spec[:box]
+      minion_c.vm.hostname = "#{minion_n}.local"
+      minion_c.vm.network "private_network", ip: spec[:ip]
+
+      minion_c.vm.provision :salt do |salt|
+        salt.minion_config = "etc/#{minion_n}"
+        salt.minion_key = "keys/#{minion_n}.pem"
+        salt.minion_pub = "keys/#{minion_n}.pub"
+
+        salt.install_type = "stable"
+        salt.install_args = "#{saltvers}"
+
+        salt.verbose = true
+        salt.colorize = true
+        salt.bootstrap_options = "-P -c /tmp"
+      end
+    end
+  end
+
 end
