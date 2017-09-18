@@ -27,6 +27,12 @@ Ensure version of guest additions on Virtualbox guest matches host
 vagrant plugin install vagrant-vbguest
 ```
 
+* Host Manager
+Allow guests to locate each other using hostname
+```
+vagrant plugin install vagrant-hostmanager
+```
+
 
 
 ## <a name="file-layout" />Expected file layouts
