@@ -16,7 +16,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Run ./bin/link-dirs.py to set up these symlinks.
     master_config.vm.synced_folder "srv/salt", "/srv/salt", type: "nfs"
     master_config.vm.synced_folder "srv/secret", "/srv/secret", type: "nfs"
-    master_config.vm.synced_folder "srv/formulas", "/srv/formulas", type: "nfs"
+    # Each symlink in srv/formulas needs to be synced separately
+    Dir["srv/formulas/*"].select { |ff| File.symlink? ff }.each { |ff|
+      fname = File.basename(ff)
+      tdir = "/srv/formulas"
+      master_config.vm.synced_folder ff, "#{tdir}/#{fname}", type: "nfs"
+    }
 
     master_config.vm.provision :salt do |salt|
       salt.master_config = "etc/master"
