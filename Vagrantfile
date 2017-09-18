@@ -38,6 +38,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       master_c.vm.hostname = "#{master_n}.local"
       master_c.vm.network "private_network", ip: spec[:ip]
 
+      # Default sync is not needed, and takes up time during provisioning
+      master_c.vm.synced_folder ".", "/vagrant", disabled: true
+
       # ./srv/ should contain symlinks to actual working directories for
       # salt-shared, salt-secret, and salt-formulas.
       # Run ./bin/link-dirs.py to set up these symlinks.
@@ -87,6 +90,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       minion_c.vm.box = spec[:box]
       minion_c.vm.hostname = "#{minion_n}.local"
       minion_c.vm.network "private_network", ip: spec[:ip]
+
+      # Default sync is not needed, and takes up time during provisioning
+      minion_c.vm.synced_folder ".", "/vagrant", disabled: true
 
       minion_c.vm.provision :salt do |salt|
         salt.minion_config = "etc/#{minion_n}"
