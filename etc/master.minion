@@ -1,3 +1,2 @@
 master: localhost
-id: master
 hash_type: sha256

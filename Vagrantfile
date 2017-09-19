@@ -6,24 +6,28 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   machines = {
     :master => {
       :ip => "192.168.50.10",
+      :hostname => "master.local",
       :cpus => 2,
       :memory => 2048,
       :box => "ubuntu/xenial64"
     },
     :'centos-7-1' => {
       :ip => "192.168.50.20",
+      :hostname => "centos-7-1.local",
       :cpus => 1,
       :memory => 1024,
       :box => "centos/7"
     },
     :'centos-6-1' => {
       :ip => "192.168.50.21",
+      :hostname => "centos-6-1.local",
       :cpus => 1,
       :memory => 1024,
       :box => "centos/6"
     },
     :'ubuntu-1604-1' => {
       :ip => "192.168.50.22",
+      :hostname => "ubuntu-1604-1.local",
       :cpus => 1,
       :memory => 1024,
       :box => "ubuntu/xenial64"
@@ -41,7 +45,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.memory = spec[:memory]
       end
       master_c.vm.box = spec[:box]
-      master_c.vm.hostname = "#{master_n}.local"
+      master_c.vm.hostname = spec[:hostname]
       master_c.vm.network "private_network", ip: spec[:ip]
 
       # Default sync is not needed, and takes up time during provisioning
@@ -65,13 +69,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         salt.master_pub = "keys/#{master_n}.pub"
 
         # Preseed master with self and all other minions
-        seeds = { master_n => "keys/#{master_n}.minion.pub" }
-        minions.keys.each { |mn|
-          seeds[mn] = "keys/#{mn}.pub"
+        seeds = { spec[:hostname] => "keys/#{master_n}.minion.pub" }
+        minions.each { |mn, mspec|
+          seeds[ mspec[:hostname] ] = "keys/#{mn}.pub"
         }
         salt.seed_master = seeds
 
-        salt.minion_config = "etc/#{master_n}.minion"
+        salt.minion_config = "etc/master.minion"
         salt.minion_key = "keys/#{master_n}.minion.pem"
         salt.minion_pub = "keys/#{master_n}.minion.pub"
 
@@ -94,14 +98,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.memory = spec[:memory]
       end
       minion_c.vm.box = spec[:box]
-      minion_c.vm.hostname = "#{minion_n}.local"
+      minion_c.vm.hostname = spec[:hostname]
       minion_c.vm.network "private_network", ip: spec[:ip]
 
       # Default sync is not needed, and takes up time during provisioning
       minion_c.vm.synced_folder ".", "/vagrant", disabled: true
 
       minion_c.vm.provision :salt do |salt|
-        salt.minion_config = "etc/#{minion_n}"
+        salt.minion_config = "etc/minion"
         salt.minion_key = "keys/#{minion_n}.pem"
         salt.minion_pub = "keys/#{minion_n}.pub"
 
