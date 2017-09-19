@@ -2,7 +2,7 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  saltvers = "2016.3.4"
+  saltvers = "2016.11.7"
   machines = {
     :master => {
       :ip => "192.168.50.10",
