@@ -1,0 +1,3 @@
+master: master.local
+id: ubuntu-1604-1
+hash_type: sha256

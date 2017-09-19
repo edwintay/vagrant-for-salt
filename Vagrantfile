@@ -21,6 +21,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       :cpus => 1,
       :memory => 1024,
       :box => "centos/6"
+    },
+    :'ubuntu-1604-1' => {
+      :ip => "192.168.50.22",
+      :cpus => 1,
+      :memory => 1024,
+      :box => "ubuntu/xenial64"
     }
   }
 
