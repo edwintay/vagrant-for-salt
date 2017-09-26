@@ -68,7 +68,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       find_links("srv").each { |path|
         local = File.join(path)
         guest = File.join("/", path)
-        master_c.vm.synced_folder local, guest, type: "nfs"
+        master_c.vm.synced_folder local, guest, type: "nfs",
+          mount_options: ["ro"]
       }
 
       master_c.vm.provision :salt do |salt|
