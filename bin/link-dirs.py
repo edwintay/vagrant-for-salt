@@ -51,14 +51,14 @@ def expandvars(sources):
 
 def find_sources(conf):
   raw = {}
-  if conf:
-    with open(conf, "r") as ff:
-      raw = json.load(ff)
+  with open(conf, "r") as ff:
+    raw = json.load(ff)
 
   # Check that minimal sources have been defined
-  for name in ("salt", "secret"):
+  for name in ("salt",):
     if name not in raw:
-      raise argparse.ArgumentError("--%s" % name, "must be defined")
+      raise argparse.ArgumentTypeError("key '%s' missing in "
+                                       "%s" % (name, conf))
 
   sources = expandvars(raw)
 
@@ -102,7 +102,7 @@ def parse_args(argv):
   parser = argparse.ArgumentParser(description="Symlink host directories "
                                    " into Vagrant guest /srv folder")
   parser.add_argument("--config", help="config file containing symlink "
-                      "mappings for /srv")
+                      "mappings for /srv", required=True)
   parser.add_argument("-s", "--silent", help="set log level to WARNING",
                       dest="loglevel", action="store_const",
                       const=logging.WARNING, default=logging.INFO)
