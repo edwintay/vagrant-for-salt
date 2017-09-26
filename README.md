@@ -56,7 +56,9 @@ Roots
 
 
 ## <a name="linking-work" />Linking working directories
-Link your working directory into the Vagrant guests using bin/link-dirs.py
+Link your working directory into the Vagrant guests using bin/link-dirs.py.
+
+The Vagrantfile will mount directories found in ./srv/ to /srv/ on the guests.
 
 See python bin/link-dirs.py --help for usage information.
 

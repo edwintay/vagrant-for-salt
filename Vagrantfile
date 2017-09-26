@@ -1,3 +1,15 @@
+require 'json'
+
+def find_links(root)
+  Enumerator.new do |yy|
+    Dir.glob("#{root}/**/*") do |path|
+      if File.symlink?(path)
+        yy << path
+      end
+    end
+  end
+end
+
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
@@ -51,21 +63,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # Default sync is not needed, and takes up time during provisioning
       master_c.vm.synced_folder ".", "/vagrant", disabled: true
 
-      # ./srv/ should contain symlinks to actual working directories for
-      # Required:
-      #   salt-shared
-      # Optional:
-      #   salt-secret, salt-formulas/*
+      # ./srv/ should contain symlinks to actual working directories
       # Run ./bin/link-dirs.py to set up these symlinks.
-      master_c.vm.synced_folder "srv/salt", "/srv/salt", type: "nfs"
-      if File.symlink?("srv/secret")
-        master_c.vm.synced_folder "srv/secret", "/srv/secret", type: "nfs"
-      end
-      # Each symlink in srv/formulas needs to be synced separately
-      Dir["srv/formulas/*"].select { |ff| File.symlink? ff }.each { |ff|
-        fname = File.basename(ff)
-        tdir = "/srv/formulas"
-        master_c.vm.synced_folder ff, "#{tdir}/#{fname}", type: "nfs"
+      find_links("srv").each { |path|
+        local = File.join(path)
+        guest = File.join("/", path)
+        master_c.vm.synced_folder local, guest, type: "nfs"
       }
 
       master_c.vm.provision :salt do |salt|
