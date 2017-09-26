@@ -52,10 +52,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       master_c.vm.synced_folder ".", "/vagrant", disabled: true
 
       # ./srv/ should contain symlinks to actual working directories for
-      # salt-shared, salt-secret, and salt-formulas.
+      # Required:
+      #   salt-shared
+      # Optional:
+      #   salt-secret, salt-formulas/*
       # Run ./bin/link-dirs.py to set up these symlinks.
       master_c.vm.synced_folder "srv/salt", "/srv/salt", type: "nfs"
-      master_c.vm.synced_folder "srv/secret", "/srv/secret", type: "nfs"
+      if File.symlink?("srv/secret")
+        master_c.vm.synced_folder "srv/secret", "/srv/secret", type: "nfs"
+      end
       # Each symlink in srv/formulas needs to be synced separately
       Dir["srv/formulas/*"].select { |ff| File.symlink? ff }.each { |ff|
         fname = File.basename(ff)

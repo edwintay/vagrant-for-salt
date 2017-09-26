@@ -48,8 +48,10 @@ Encryption keys
 Roots
 * srv
   * salt
-  * secret
   * formulas
+    * salt-formula
+    * ... other formula repos ...
+  * ... other salt repos ...
 
 
 
