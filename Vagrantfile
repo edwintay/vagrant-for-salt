@@ -46,8 +46,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     }
   }
 
-  masters = machines.slice(:master)
-  minions = machines.except(:master)
+  is_master = -> (k,_) { k == :master }
+  masters = machines.select(&is_master)
+  minions = machines.reject(&is_master)
 
   masters.each do |master_n, spec|
     config.vm.define master_n, primary: true do |master_c|
