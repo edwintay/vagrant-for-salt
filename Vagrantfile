@@ -129,8 +129,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
+  # Ensure version of guest additions on Virtualbox guest matches host
+  config.vagrant.plugins = "vagrant-vbguest"
+
+  # Allow guests to locate each other using hostnames
   # Use vagrant-hostmanager plugin to manage only guest /etc/hosts
   # Include all VMs and use their private_ip
+  config.vagrant.plugins = "vagrant-hostmanager"
   config.hostmanager.enabled = true
   config.hostmanager.manage_host = false
   config.hostmanager.manage_guest = true
