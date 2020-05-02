@@ -18,28 +18,28 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   machines = {
     :master => {
       :ip => "192.168.50.10",
-      :hostname => "master.local",
+      :hostname => "master.dev",
       :cpus => 2,
       :memory => 2048,
       :box => "ubuntu/xenial64"
     },
     :'centos-7-1' => {
       :ip => "192.168.50.20",
-      :hostname => "centos-7-1.local",
+      :hostname => "centos-7-1.dev",
       :cpus => 1,
       :memory => 1024,
       :box => "centos/7"
     },
     :'centos-6-1' => {
       :ip => "192.168.50.21",
-      :hostname => "centos-6-1.local",
+      :hostname => "centos-6-1.dev",
       :cpus => 1,
       :memory => 1024,
       :box => "centos/6"
     },
     :'ubuntu-1604-1' => {
       :ip => "192.168.50.22",
-      :hostname => "ubuntu-1604-1.local",
+      :hostname => "ubuntu-1604-1.dev",
       :cpus => 1,
       :memory => 1024,
       :box => "ubuntu/xenial64"
