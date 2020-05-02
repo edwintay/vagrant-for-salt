@@ -10,17 +10,24 @@ Vagrant environment for developing Salt state files
 
 
 ## <a name="deps" />Dependencies
-* Git
+
 * Vagrant
 * VirtualBox
+* NFS server
 
-On macOS
+* macOS
+
 ```
-brew install git
-brew cask install virtualbox
-brew cask install vagrant
+> brew cask install vagrant
+> brew cask install virtualbox
 ```
 
+* Ubuntu
+
+```
+> sudo apt install virtualbox
+> sudo apt install nfs-kernel-server
+> sudo ufw allow in from 192.168.50.0/24 to any port nfs
 ```
 
 
