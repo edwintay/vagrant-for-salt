@@ -7,5 +7,6 @@ in
 pkgs.mkShell {
   nativeBuildInputs = [
     pkgs.bashInteractive
+    pkgs.vagrant
   ];
 }
