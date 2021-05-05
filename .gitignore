@@ -12,3 +12,6 @@ etc/*.sample
 # user project configs
 !conf/README.md
 conf/*
+
+# direnv cache
+.direnv
